@@ -4,15 +4,40 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 )
 
 type Service struct {
 	relays map[string]Relay
 }
 
+const (
+	DefaultCollectInterval = 30 * time.Second
+)
+
+var collector MetricsCollector
+
 func New(config Config) (*Service, error) {
 	s := new(Service)
 	s.relays = make(map[string]Relay)
+
+	if config.MetricsCollector.Url != "" {
+		if config.MetricsCollector.Name == "" {
+			config.MetricsCollector.Name = config.MetricsCollector.Url
+		}
+
+		interval, err := time.ParseDuration(config.MetricsCollector.Interval)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing metrics collect interval %v", err)
+		}
+		interval = DefaultCollectInterval
+
+		collector = MetricsCollector{
+			name:     config.MetricsCollector.Name,
+			url:      config.MetricsCollector.Url,
+			interval: interval,
+		}
+	}
 
 	for _, cfg := range config.HTTPRelays {
 		h, err := NewHTTP(cfg)

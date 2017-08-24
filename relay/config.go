@@ -7,8 +7,15 @@ import (
 )
 
 type Config struct {
-	HTTPRelays []HTTPConfig `toml:"http"`
-	UDPRelays  []UDPConfig  `toml:"udp"`
+	MetricsCollector MetricsCollectorConfig `toml:"collector"`
+	HTTPRelays       []HTTPConfig           `toml:"http"`
+	UDPRelays        []UDPConfig            `toml:"udp"`
+}
+
+type MetricsCollectorConfig struct {
+	Name     string `toml:"name"`
+	Url      string `toml:"url"`
+	Interval string `toml:"interval"`
 }
 
 type HTTPConfig struct {

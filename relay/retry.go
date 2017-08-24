@@ -69,6 +69,9 @@ func (r *retryBuffer) post(buf []byte, query string, auth string) (*responseData
 
 func (r *retryBuffer) run() {
 	buf := bytes.NewBuffer(make([]byte, 0, r.maxBatch))
+
+	go collector.RunMetricsCollector(r.list)
+
 	for {
 		buf.Reset()
 		batch := r.list.pop()
