@@ -33,14 +33,14 @@ type retryBuffer struct {
 	p poster
 }
 
-func newRetryBuffer(size, batch int, max time.Duration, p poster) *retryBuffer {
+func newRetryBuffer(name string, size, batch int, max time.Duration, p poster) *retryBuffer {
 	r := &retryBuffer{
 		initialInterval: retryInitial,
 		multiplier:      retryMultiplier,
 		maxInterval:     max,
 		maxBuffered:     size,
 		maxBatch:        batch,
-		list:            newBufferList(size, batch),
+		list:            newBufferList(name, size, batch),
 		p:               p,
 	}
 	go r.run()
@@ -126,6 +126,7 @@ func newBatch(buf []byte, query string, auth string) *batch {
 }
 
 type bufferList struct {
+	name     string
 	cond     *sync.Cond
 	head     *batch
 	size     int
@@ -133,8 +134,9 @@ type bufferList struct {
 	maxBatch int
 }
 
-func newBufferList(maxSize, maxBatch int) *bufferList {
+func newBufferList(name string, maxSize, maxBatch int) *bufferList {
 	return &bufferList{
+		name:     name,
 		cond:     sync.NewCond(new(sync.Mutex)),
 		maxSize:  maxSize,
 		maxBatch: maxBatch,
